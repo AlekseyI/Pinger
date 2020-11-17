@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8222ABCF-808E-4010-9553-062000C72938}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Pinger</RootNamespace>
+    <AssemblyName>Pinger</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\JsonFile\ConfigJsonData.cs" />
+    <Compile Include="Config\ConfigInput.cs" />
+    <Compile Include="Config\JsonFile\ConfigJsonFile.cs" />
+    <Compile Include="Config\IConfig.cs" />
+    <Compile Include="Constant.cs" />
+    <Compile Include="Enums\ConfigFormatEnum.cs" />
+    <Compile Include="Enums\LogFormatEnum.cs" />
+    <Compile Include="Exceptions\ConfigException.cs" />
+    <Compile Include="Exceptions\LogException.cs" />
+    <Compile Include="Exceptions\PingRequestException.cs" />
+    <Compile Include="Factory\ConfigFactory.cs" />
+    <Compile Include="Factory\DefaultConfigFactory.cs" />
+    <Compile Include="Factory\IFactory.cs" />
+    <Compile Include="Factory\LogFactory.cs" />
+    <Compile Include="Factory\PingRequestFactory.cs" />
+    <Compile Include="Input\HostInput.cs" />
+    <Compile Include="Input\HostInputValidate.cs" />
+    <Compile Include="Input\HostPortInput.cs" />
+    <Compile Include="Input\IHostInputCheck.cs" />
+    <Compile Include="Input\IHostInputParse.cs" />
+    <Compile Include="Log\ILog.cs" />
+    <Compile Include="Log\ILogData.cs" />
+    <Compile Include="Log\ILogInput.cs" />
+    <Compile Include="Log\LogInput.cs" />
+    <Compile Include="Log\LogData.cs" />
+    <Compile Include="Log\TextFile\LogTextFile.cs" />
+    <Compile Include="Manager\IPingManager.cs" />
+    <Compile Include="Manager\PingManager.cs" />
+    <Compile Include="Response\PingCodeResponse.cs" />
+    <Compile Include="Request\HttpRequest.cs" />
+    <Compile Include="Request\IcmpRequest.cs" />
+    <Compile Include="Config\IConfigData.cs" />
+    <Compile Include="Config\IConfigInput.cs" />
+    <Compile Include="Input\IHostPortInput.cs" />
+    <Compile Include="Input\IHostInput.cs" />
+    <Compile Include="Response\IPingCodeResponse.cs" />
+    <Compile Include="Request\IPing.cs" />
+    <Compile Include="Response\IPingResponse.cs" />
+    <Compile Include="Response\IPingResponseFormat.cs" />
+    <Compile Include="Response\PingResponse.cs" />
+    <Compile Include="Enums\PingStatusEnum.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Enums\ProtocolTypeEnum.cs" />
+    <Compile Include="Request\TcpRequest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
