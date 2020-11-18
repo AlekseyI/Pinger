@@ -17,6 +17,7 @@ namespace Pinger
                     Console.ReadKey();
                 }
             }
+            Console.ReadKey();
         }
 
         public static void Status(string value)

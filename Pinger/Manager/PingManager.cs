@@ -8,6 +8,7 @@ using Pinger.Log;
 using Pinger.Request;
 using Pinger.Response;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +21,7 @@ namespace Pinger.Manager
         private ILog _log;
         private IFactory<IConfigData, IPing<IHostInput, IPingResponse>> _pingRequestFactory;
         private readonly ConfigFormatEnum _configFormat;
+        private Task[] _tasksPing;
 
         private CancellationTokenSource _sourceToken;
         private readonly object _locker;
@@ -54,11 +56,15 @@ namespace Pinger.Manager
                     _sourceToken?.Dispose();
                     _sourceToken = new CancellationTokenSource();
 
+                    _tasksPing = new Task[_configData.Count()];
+
                     EventStatus?.Invoke(Constant.PingRequestStart);
 
+                    int i = 0;
                     foreach (var config in _configData)
                     {
-                        SendPing(config, _sourceToken.Token);
+                        _tasksPing[i] = SendPing(config, _sourceToken.Token);
+                        i++;
                     }
                 }
             }
@@ -69,7 +75,7 @@ namespace Pinger.Manager
             }
         }
 
-        private async void SendPing(IConfigData configData, CancellationToken token)
+        private async Task SendPing(IConfigData configData, CancellationToken token)
         {
             IPing<IHostInput, IPingResponse> pingRequest;
 
@@ -103,7 +109,14 @@ namespace Pinger.Manager
                     break;
                 }
 
-                await Task.Delay(configData.Period);
+                try
+                {
+                    await Task.Delay(configData.Period, token);
+                }
+                catch(TaskCanceledException)
+                {
+                    break;
+                }
             }
 
             pingRequest.Dispose();
@@ -114,6 +127,13 @@ namespace Pinger.Manager
             lock (_locker)
             {
                 _sourceToken?.Cancel();
+
+                if (_tasksPing != null)
+                {
+                    Task.WaitAll(_tasksPing);
+                }
+
+                _tasksPing = null;
                 _configData = null;
                 EventStatus?.Invoke(Constant.PingRequestStop);
             }
