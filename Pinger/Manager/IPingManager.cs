@@ -1,5 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using Pinger.Config;
+using System;
 
 namespace Pinger.Manager
 {
@@ -7,6 +7,6 @@ namespace Pinger.Manager
     {
         void Start();
         void Stop();
-        bool CheckConfig();
+        bool CheckConfig(IConfigData configData);
     }
 }

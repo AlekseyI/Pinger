@@ -1,12 +1,11 @@
 ﻿using Pinger.Config;
-using Pinger.Enums;
 using Pinger.Exceptions;
 using Pinger.Factory;
-using Pinger.Factory.Ping;
 using Pinger.Input;
 using Pinger.Log;
 using Pinger.Request;
 using Pinger.Response;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,13 +13,12 @@ using System.Threading.Tasks;
 
 namespace Pinger.Manager
 {
-    public class PingerManager : IPingManager
+    public class PingManager : IPingManager
     {
         private IEnumerable<IConfigData> _configData;
         private IConfig _config;
         private ILog _log;
         private IFactory<IConfigData, IPing<IHostInput, IPingResponse>> _pingRequestFactory;
-        private readonly ConfigFormatEnum _configFormat;
         private Task[] _tasksPing;
 
         private CancellationTokenSource _sourceToken;
@@ -29,13 +27,27 @@ namespace Pinger.Manager
         public delegate void Status(string value);
         public event Status EventStatus;
 
-        public PingerManager(ConfigFormatEnum configFormat, LogFormatEnum logFormat)
+        public PingManager(IFactory<IConfigData, IPing<IHostInput, IPingResponse>> pingRequestFactory, IConfig config, ILog log)
         {
-            _configFormat = configFormat;
-            _config = new ConfigFactory().GetInstance(new ConfigInput(Constant.Config, configFormat));
-            _log = new LogFactory().GetInstance(new LogInput(Constant.Log, logFormat));
-            _pingRequestFactory = new PingRequestFactory();
-            _locker = new object();
+            if (pingRequestFactory == null)
+            {
+                throw new ArgumentNullException(nameof(pingRequestFactory));
+            }
+            else if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }           
+            else if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+            else
+            {
+                _pingRequestFactory = pingRequestFactory;
+                _config = config;
+                _log = log;
+                _locker = new object();
+            }
         }
 
         public void Start()
@@ -139,13 +151,18 @@ namespace Pinger.Manager
             }
         }
 
-        public bool CheckConfig()
+        public bool CheckConfig(IConfigData configData)
         {
+            if (configData == null)
+            {
+                throw new ArgumentNullException(nameof(configData));
+            }
+
             try
             {
                 lock (_locker)
                 {
-                    if (_config.CreateDefaultConfig(new DefaultConfigFactory().GetInstance(new ConfigInput(Constant.Config, _configFormat))))
+                    if (_config.CreateDefaultConfig(configData))
                     {
                         EventStatus?.Invoke(string.Format(Constant.ConfigNotFoundButCreated, Constant.Config));
                         return false;
@@ -168,9 +185,6 @@ namespace Pinger.Manager
             Stop();
             _sourceToken?.Dispose();
             _sourceToken = null;
-            _pingRequestFactory = null;
-            _config = null;
-            _log = null;
 
             var lstDlg = EventStatus?.GetInvocationList();
 

@@ -79,9 +79,10 @@ namespace UnitTestPinger
         [TestMethod]
         public void TcpPingHostInputNullFailTest()
         {
+            IHostPortInput hostPort = null;
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(null),
-                new PingRequestException("hostInput", nameof(ArgumentNullException)).ToString());
+                () => new TcpRequest(hostPort),
+                new PingRequestException(nameof(hostPort), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -179,9 +180,11 @@ namespace UnitTestPinger
         [TestMethod]
         public void IcmpPingHostInputNullFailTest()
         {
+            IHostInput hostInput = null;
+
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(null),
-                new PingRequestException("hostInput", nameof(ArgumentNullException)).ToString());
+                () => new IcmpRequest(hostInput),
+                new PingRequestException(nameof(hostInput), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -274,9 +277,11 @@ namespace UnitTestPinger
         [TestMethod]
         public void HttpPingHostInputNullFailTest()
         {
+            IHostInput hostInput = null;
+
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(null),
-                new PingRequestException("hostInput", nameof(ArgumentNullException)).ToString());
+                () => new HttpRequest(hostInput),
+                new PingRequestException(nameof(hostInput), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -400,14 +405,16 @@ namespace UnitTestPinger
         public void HostInputCheckHostOrPatternNullFailTest()
         {
             var hostInputCheck = new HostInputValidate();
+            string host = null;
+            string formatPattern = null;
 
             Assert.ThrowsException<PingRequestException>(
-                () => hostInputCheck.Check(null, Constant.HttpUrlOrIpCheckPattern),
-                new PingRequestException("host", nameof(ArgumentException)).ToString());
+                () => hostInputCheck.Check(host, Constant.HttpUrlOrIpCheckPattern),
+                new PingRequestException(nameof(host), nameof(ArgumentException)).ToString());
 
             Assert.ThrowsException<PingRequestException>(
-                () => hostInputCheck.Check("https://ya.ru", null),
-                new PingRequestException("formatPattern", nameof(ArgumentException)).ToString());
+                () => hostInputCheck.Check("https://ya.ru", formatPattern),
+                new PingRequestException(nameof(formatPattern), nameof(ArgumentException)).ToString());
         }
 
         [TestMethod]
@@ -425,24 +432,26 @@ namespace UnitTestPinger
         public void TcpHostInputParseFormatFailTest()
         {
             var hostInputCheck = new HostInputValidate();
+            string host = null;
 
             Assert.ThrowsException<PingRequestException>(
                 () => hostInputCheck.Parse("173.194.216.113"),
-                new PingRequestException("host", nameof(FormatException)).ToString());
+                new PingRequestException(nameof(host), nameof(FormatException)).ToString());
 
             Assert.ThrowsException<PingRequestException>(
                 () => hostInputCheck.Parse("173.194.216.113:" + long.MaxValue.ToString()),
-                new PingRequestException("host", nameof(OverflowException)).ToString());
+                new PingRequestException(nameof(host), nameof(OverflowException)).ToString());
         }
 
         [TestMethod]
         public void HostInputParseHostNullFailTest()
         {
             var hostInputCheck = new HostInputValidate();
+            string host = null;
 
             Assert.ThrowsException<PingRequestException>(
-                () => hostInputCheck.Parse(null),
-                new PingRequestException("host", nameof(ArgumentNullException)).ToString());
+                () => hostInputCheck.Parse(host),
+                new PingRequestException(nameof(host), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -502,9 +511,11 @@ namespace UnitTestPinger
         [TestMethod]
         public void LogTextFileLogInputNullFailTest()
         {
+            ILogInput logInput = null;
+
             Assert.ThrowsException<LogException>(
-                () => new LogTextFile(null),
-                new LogException("logInput", nameof(ArgumentNullException)).ToString());
+                () => new LogTextFile(logInput),
+                new LogException(nameof(logInput), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -512,10 +523,11 @@ namespace UnitTestPinger
         {
             var logInput = new LogInput("D:\\" + Constant.Log, LogFormatEnum.TextFile);
             var log = new LogTextFile(logInput);
+            ILogData logData = null;
 
             Assert.ThrowsException<LogException>(
-                () => log.Write(null),
-                new LogException("logData", nameof(ArgumentNullException)).ToString());
+                () => log.Write(logData),
+                new LogException(nameof(logData), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -709,10 +721,11 @@ namespace UnitTestPinger
         public void PingFactoryConfigDataNullTest()
         {
             var factory = new PingRequestFactory();
+            IConfigData configData = null;
 
             Assert.ThrowsException<PingRequestException>(
-                () => factory.GetInstance(null),
-                new PingRequestException("configData", nameof(ArgumentNullException)).ToString());
+                () => factory.GetInstance(configData),
+                new PingRequestException(nameof(configData), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -810,10 +823,11 @@ namespace UnitTestPinger
         public void LogFactoryLogFormatNullTest()
         {
             var factory = new LogFactory();
+            ILogInput logInput = null;
 
             Assert.ThrowsException<LogException>(
-                () => factory.GetInstance(null),
-                new LogException("param", nameof(ArgumentNullException)).ToString());
+                () => factory.GetInstance(logInput),
+                new LogException(nameof(logInput), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -887,10 +901,11 @@ namespace UnitTestPinger
         public void DefaultConfigFactoryConfigFormatNullTest()
         {
             var factory = new DefaultConfigFactory();
+            IConfigInput configInput = null;
 
             Assert.ThrowsException<ConfigException>(
-                () => factory.GetInstance(null),
-                new ConfigException("param", nameof(ArgumentNullException)).ToString());
+                () => factory.GetInstance(configInput),
+                new ConfigException(nameof(configInput), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -976,10 +991,11 @@ namespace UnitTestPinger
         public void ConfigFactoryConfigFormatNullTest()
         {
             var factory = new ConfigFactory();
+            IConfigInput configInput = null;
 
             Assert.ThrowsException<ConfigException>(
-                () => factory.GetInstance(null),
-                new ConfigException("param", nameof(ArgumentNullException)).ToString());
+                () => factory.GetInstance(configInput),
+                new ConfigException(nameof(configInput), nameof(ArgumentNullException)).ToString());
         }
 
         [TestMethod]
@@ -996,108 +1012,178 @@ namespace UnitTestPinger
 
         #region PingManager
 
-        private string PingManagerTest(string expected, bool isStop = false, bool isCheck = false, bool expectedCheckResult = false)
+        [TestMethod]
+        public void PingManagerCreateInstanceSuccessTest()
         {
-            var pingManagerMock = new Mock<IPingManager>();
-            string response = null;
+            var pingRequestFactory = Mock.Of<IFactory<IConfigData, IPing<IHostInput, IPingResponse>>>();
+            var config = Mock.Of<IConfig>();
+            var log = Mock.Of<ILog>();
 
-            if (isStop)
-            {
-                pingManagerMock.Setup(v => v.Stop()).Callback(() => response = expected);
-                pingManagerMock.Object.Stop();
-            }
-            else if (isCheck)
-            {
-                pingManagerMock.Setup(v => v.CheckConfig()).Returns(() => expectedCheckResult).Callback(() => response = expected);
-                Assert.AreEqual(expectedCheckResult, pingManagerMock.Object.CheckConfig());
-            }
-            else
-            {
-                pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
-                pingManagerMock.Object.Start();
-            }
-           
-            return response;
+            var pingManager = new PingManager(pingRequestFactory, config, log);
+
+            Assert.IsInstanceOfType(pingManager, typeof(PingManager));
+        }
+
+        [TestMethod]
+        public void PingManagerNullArgumentsFailTest()
+        {
+            var pingRequestFactory = Mock.Of<IFactory<IConfigData, IPing<IHostInput, IPingResponse>>>();
+            var config = Mock.Of<IConfig>();
+            var log = Mock.Of<ILog>();
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new PingManager(null, config, log),
+                new ArgumentNullException(nameof(pingRequestFactory)).Message);
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new PingManager(pingRequestFactory, null, log),
+                new ArgumentNullException(nameof(config)).Message);
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new PingManager(pingRequestFactory, config, null),
+                new ArgumentNullException(nameof(log)).Message);
         }
 
         [TestMethod]
         public void PingManagerStartReadConfigSuccessTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = string.Format(Constant.ConfigSuccessRead, Constant.Config);
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected));
+            pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
+            pingManagerMock.Object.Start();
+
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerStartPingRequestSuccessTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = Constant.PingRequestStart;
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected));
+            pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
+            pingManagerMock.Object.Start();
+
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerStartReadConfigFailTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = string.Format(Constant.ConfigFailRead, Constant.Config, new ConfigException());
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected));
+            pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
+            pingManagerMock.Object.Start();
+
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerStartPingRequestInstanceFailTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = string.Format(Constant.PingRequestInstanceFail, ProtocolTypeEnum.Http, new PingRequestException());
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected));
+            pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
+            pingManagerMock.Object.Start();
+
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerStartPingRequestFailTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = string.Format(Constant.PingRequestFail, ProtocolTypeEnum.Http, new PingRequestException());
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected));
+            pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
+            pingManagerMock.Object.Start();
+
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerStartLogWriteFailTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = string.Format(Constant.LogFailWrite, Constant.Log, new LogException());
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected));
+            pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
+            pingManagerMock.Object.Start();
+
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerStopTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = Constant.PingRequestStop;
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected, true));
+            pingManagerMock.Setup(v => v.Stop()).Callback(() => response = expected);
+            pingManagerMock.Object.Stop();
+
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerCheckConfigCreateFailTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = string.Format(Constant.ConfigFailCreate, Constant.Config, new ConfigException());
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected, false, true, false));
+            var configData = Mock.Of<IConfigData>();
+            pingManagerMock.Setup(v => v.CheckConfig(configData)).Returns(() => false).Callback(() => response = expected);
+
+            Assert.IsFalse(pingManagerMock.Object.CheckConfig(configData));
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerCheckConfigNotFoundButCreatedTest()
         {
+            var pingManagerMock = new Mock<IPingManager>();
             string expected = string.Format(Constant.ConfigNotFoundButCreated, Constant.Config);
+            string response = null;
 
-            Assert.AreEqual(expected, PingManagerTest(expected, false, true, false));
+            var configData = Mock.Of<IConfigData>();
+            pingManagerMock.Setup(v => v.CheckConfig(configData)).Returns(() => false).Callback(() => response = expected);
+
+            Assert.IsFalse(pingManagerMock.Object.CheckConfig(configData));
+            Assert.AreEqual(expected, response);
         }
 
         [TestMethod]
         public void PingManagerCheckConfigCreateSuccessTest()
         {
-            string expected = null;
+            var pingManagerMock = new Mock<IPingManager>();
+            var configData = Mock.Of<IConfigData>();
 
-            Assert.AreEqual(expected, PingManagerTest(expected, false, true, true));
+            pingManagerMock.Setup(v => v.CheckConfig(configData)).Returns(() => true);
+            Assert.IsTrue(pingManagerMock.Object.CheckConfig(configData));
+        }
+
+        [TestMethod]
+        public void PingManagerCheckConfigNullArgumentFailTest()
+        {
+            var pingRequestFactory = Mock.Of<IFactory<IConfigData, IPing<IHostInput, IPingResponse>>>();
+            var config = Mock.Of<IConfig>();
+            var log = Mock.Of<ILog>();
+            IConfigData configData = null;
+
+            var pingManager = new PingManager(pingRequestFactory, config, log);
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => pingManager.CheckConfig(configData),
+                new ArgumentNullException(nameof(configData)).Message);
         }
 
         #endregion

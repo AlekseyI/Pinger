@@ -1,4 +1,8 @@
-﻿using Pinger.Enums;
+﻿using Pinger.Config;
+using Pinger.Enums;
+using Pinger.Factory;
+using Pinger.Factory.Ping;
+using Pinger.Log;
 using Pinger.Manager;
 using System;
 
@@ -8,10 +12,17 @@ namespace Pinger
     {
         static void Main(string[] args)
         {
-            using (var pinger = new PingerManager(ConfigFormatEnum.JsonFile, LogFormatEnum.TextFile))
+            var pingRequestFactory = new PingRequestFactory();
+            var configInput = new ConfigInput(Constant.Config, ConfigFormatEnum.JsonFile);
+            var logInput = new LogInput(Constant.Log, LogFormatEnum.TextFile);
+            var config = new ConfigFactory().GetInstance(configInput);
+            var log = new LogFactory().GetInstance(logInput);
+            var configData = new DefaultConfigFactory().GetInstance(configInput);
+            
+            using (var pinger = new PingManager(pingRequestFactory, config, log))
             {
                 pinger.EventStatus += Status;
-                if (pinger.CheckConfig())
+                if (pinger.CheckConfig(configData))
                 {
                     pinger.Start();
                     Console.ReadKey();
