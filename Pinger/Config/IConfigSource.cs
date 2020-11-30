@@ -2,9 +2,9 @@
 
 namespace Pinger.Config
 {
-    public interface IConfigInput
+    public interface IConfigSource
     {
-        ConfigFormatEnum Format { get; }
+        ConfigFormat Format { get; }
         string Path { get; }
     }
 }

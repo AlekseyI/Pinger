@@ -1,8 +1,7 @@
 ﻿using Pinger.Config;
 using Pinger.Enums;
-using Pinger.Exceptions;
 using Pinger.Input;
-using Pinger.Request;
+using Pinger.Connection;
 using Pinger.Response;
 using System;
 
@@ -14,28 +13,28 @@ namespace Pinger.Factory.Ping
         {
             if (configData == null)
             {
-                throw new PingRequestException(nameof(configData), nameof(ArgumentNullException));
+                throw new ArgumentNullException(nameof(configData));
             }
 
             switch (configData.Protocol)
             {
-                case ProtocolTypeEnum.Http:
+                case TypeProtocol.Http:
                     {
-                        return new HttpRequest(new HostInput(configData.Host, configData.TimeOut));
+                        return new HttpConnection(new HostInput(configData.Host, configData.TimeOut));
                     }
-                case ProtocolTypeEnum.Icmp:
+                case TypeProtocol.Icmp:
                     {
-                        return new IcmpRequest(new HostInput(configData.Host, configData.TimeOut));
+                        return new IcmpConnection(new HostInput(configData.Host, configData.TimeOut));
                     }
-                case ProtocolTypeEnum.Tcp:
+                case TypeProtocol.Tcp:
                     {
                         IHostInputParse inputParser = new HostInputValidate();
                         var (ip, port) = inputParser.Parse(configData.Host);
-                        return new TcpRequest(new HostPortInput(ip, port, configData.TimeOut));
+                        return new TcpConnection(new HostPortInput(ip, port, configData.TimeOut));
                     }
                 default:
                     {
-                        throw new PingRequestException($"{nameof(configData.Protocol) } = { configData.Protocol } is unsupported", nameof(ArgumentException));
+                        throw new ArgumentException($"{nameof(configData.Protocol) } = { configData.Protocol } is unsupported");
                     }
             }
         }

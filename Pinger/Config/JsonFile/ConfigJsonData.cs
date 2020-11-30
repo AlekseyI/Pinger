@@ -14,6 +14,6 @@ namespace Pinger.Config.JsonFile
         public TimeSpan TimeOut { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public ProtocolTypeEnum Protocol { get; set; }
+        public TypeProtocol Protocol { get; set; }
     }
 }

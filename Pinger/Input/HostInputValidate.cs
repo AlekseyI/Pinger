@@ -1,5 +1,4 @@
-﻿using Pinger.Exceptions;
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
 
 namespace Pinger.Input
@@ -10,26 +9,15 @@ namespace Pinger.Input
         {
             if (host == null)
             {
-                throw new PingRequestException(nameof(host), nameof(ArgumentNullException));
+                throw new ArgumentNullException(nameof(host));
             }
             else if (formatPattern == null)
             {
-                throw new PingRequestException(nameof(formatPattern), nameof(ArgumentNullException));
+                throw new ArgumentNullException(nameof(formatPattern));
             }
             else
             {
-                try
-                {
-                    return Regex.IsMatch(host, formatPattern, RegexOptions.Compiled);
-                }
-                catch(RegexMatchTimeoutException e)
-                {
-                    throw new PingRequestException(e.Message, nameof(RegexMatchTimeoutException));
-                }
-                catch(ArgumentOutOfRangeException e)
-                {
-                    throw new PingRequestException(e.Message, nameof(ArgumentOutOfRangeException));
-                }
+                return Regex.IsMatch(host, formatPattern, RegexOptions.Compiled);
             }
         }
 
@@ -37,37 +25,18 @@ namespace Pinger.Input
         {
             if (host == null)
             {
-                throw new PingRequestException(nameof(host), nameof(ArgumentNullException));
+                throw new ArgumentNullException(nameof(host));
             }
 
-            Match ipPortMatch;
-            try
-            {
-                ipPortMatch = Regex.Match(host, Constant.TcpIpPortPattern, RegexOptions.Compiled);
-            }
-            catch (RegexMatchTimeoutException e)
-            {
-                throw new PingRequestException(e.Message, nameof(RegexMatchTimeoutException));
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                throw new PingRequestException(e.Message, nameof(ArgumentOutOfRangeException));
-            }
+            var ipPortMatch = Regex.Match(host, Constant.TcpIpPortPattern, RegexOptions.Compiled);
 
             if (ipPortMatch.Success)
-            {
-                try
-                {
-                    return (ipPortMatch.Groups[1].Value, int.Parse(ipPortMatch.Groups[2].Value));
-                }
-                catch(OverflowException)
-                {
-                    throw new PingRequestException(nameof(host), nameof(OverflowException));
-                } 
+            { 
+                return (ipPortMatch.Groups[1].Value, int.Parse(ipPortMatch.Groups[2].Value));
             }
             else
             {
-                throw new PingRequestException(nameof(host), nameof(FormatException));
+                throw new FormatException(nameof(host));
             }
         }
     }

@@ -8,6 +8,6 @@ namespace Pinger.Config
         string Host { get; set; }
         TimeSpan Period { get; set; }
         TimeSpan TimeOut { get; set; }
-        ProtocolTypeEnum Protocol { get; set; }
+        TypeProtocol Protocol { get; set; }
     }
 }

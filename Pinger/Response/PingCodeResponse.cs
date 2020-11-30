@@ -6,12 +6,12 @@ namespace Pinger.Response
     public class PingCodeResponse : IPingCodeResponse
     {
         public DateTime Time { get; }
-        public ProtocolTypeEnum Protocol { get; }
+        public TypeProtocol Protocol { get; }
         public string Host { get; }
-        public PingStatusEnum Status { get; }
+        public PingStatus Status { get; }
         public int Code { get; }
 
-        public PingCodeResponse(DateTime time, ProtocolTypeEnum protocol, string host, PingStatusEnum status, int code)
+        public PingCodeResponse(DateTime time, TypeProtocol protocol, string host, PingStatus status, int code)
         {
             Time = time;
             Protocol = protocol;

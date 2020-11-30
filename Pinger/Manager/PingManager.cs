@@ -1,9 +1,8 @@
 ﻿using Pinger.Config;
-using Pinger.Exceptions;
 using Pinger.Factory;
 using Pinger.Input;
-using Pinger.Log;
-using Pinger.Request;
+using Pinger.Logger;
+using Pinger.Connection;
 using Pinger.Response;
 using System;
 using System.Collections.Generic;
@@ -16,18 +15,15 @@ namespace Pinger.Manager
     public class PingManager : IPingManager
     {
         private IEnumerable<IConfigData> _configData;
-        private IConfig _config;
-        private ILog _log;
+        private IConfig<IConfigSource, IEnumerable<IConfigData>> _config;
+        private ILogger<ILogSource, ILogData> _log;
         private IFactory<IConfigData, IPing<IHostInput, IPingResponse>> _pingRequestFactory;
         private Task[] _tasksPing;
 
         private CancellationTokenSource _sourceToken;
         private readonly object _locker;
 
-        public delegate void Status(string value);
-        public event Status EventStatus;
-
-        public PingManager(IFactory<IConfigData, IPing<IHostInput, IPingResponse>> pingRequestFactory, IConfig config, ILog log)
+        public PingManager(IFactory<IConfigData, IPing<IHostInput, IPingResponse>> pingRequestFactory, IConfig<IConfigSource, IEnumerable<IConfigData>> config, ILogger<ILogSource, ILogData> log)
         {
             if (pingRequestFactory == null)
             {
@@ -36,7 +32,7 @@ namespace Pinger.Manager
             else if (config == null)
             {
                 throw new ArgumentNullException(nameof(config));
-            }           
+            }
             else if (log == null)
             {
                 throw new ArgumentNullException(nameof(log));
@@ -50,40 +46,33 @@ namespace Pinger.Manager
             }
         }
 
-        public void Start()
+        public void Start(bool isWait)
         {
-            try
+            lock (_locker)
             {
-                lock (_locker)
+                if (_config == null || _configData != null)
                 {
-                    if (_config == null || _configData != null)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    _configData = _config.Read();
+                _configData = _config.Read();
 
-                    EventStatus?.Invoke(string.Format(Constant.ConfigSuccessRead, Constant.Config));
+                _sourceToken?.Dispose();
+                _sourceToken = new CancellationTokenSource();
 
-                    _sourceToken?.Dispose();
-                    _sourceToken = new CancellationTokenSource();
+                _tasksPing = new Task[_configData.Count()];
 
-                    _tasksPing = new Task[_configData.Count()];
-
-                    EventStatus?.Invoke(Constant.PingRequestStart);
-
-                    int i = 0;
-                    foreach (var config in _configData)
-                    {
-                        _tasksPing[i] = SendPing(config, _sourceToken.Token);
-                        i++;
-                    }
+                int i = 0;
+                foreach (var config in _configData)
+                {
+                    _tasksPing[i] = SendPing(config, _sourceToken.Token);
+                    i++;
                 }
             }
-            catch (ConfigException e)
+
+            if (isWait)
             {
-                EventStatus?.Invoke(string.Format(Constant.ConfigFailRead, Constant.Config, e));
-                _configData = null;
+                Task.WaitAll(_tasksPing);
             }
         }
 
@@ -91,15 +80,7 @@ namespace Pinger.Manager
         {
             IPing<IHostInput, IPingResponse> pingRequest;
 
-            try
-            {
-                pingRequest = _pingRequestFactory.GetInstance(configData);
-            }
-            catch (PingRequestException e)
-            {
-                EventStatus?.Invoke(string.Format(Constant.PingRequestInstanceFail, configData.Protocol, e));
-                return;
-            }
+            pingRequest = _pingRequestFactory.GetInstance(configData);
 
             var logData = new LogData();
 
@@ -107,17 +88,12 @@ namespace Pinger.Manager
             {
                 try
                 {
-                    logData.Log = pingRequest.Ping();
+                    await pingRequest.Ping();
+                    logData.Log = pingRequest.Response;
                     await _log.WriteAsync(logData);
                 }
-                catch (PingRequestException e)
+                catch (Exception)
                 {
-                    EventStatus?.Invoke(string.Format(Constant.PingRequestFail, configData.Protocol, e));
-                    break;
-                }
-                catch (LogException e)
-                {
-                    EventStatus?.Invoke(string.Format(Constant.LogFailWrite, Constant.Log, e));
                     break;
                 }
 
@@ -125,7 +101,7 @@ namespace Pinger.Manager
                 {
                     await Task.Delay(configData.Period, token);
                 }
-                catch(TaskCanceledException)
+                catch (TaskCanceledException)
                 {
                     break;
                 }
@@ -147,7 +123,6 @@ namespace Pinger.Manager
 
                 _tasksPing = null;
                 _configData = null;
-                EventStatus?.Invoke(Constant.PingRequestStop);
             }
         }
 
@@ -158,25 +133,16 @@ namespace Pinger.Manager
                 throw new ArgumentNullException(nameof(configData));
             }
 
-            try
+            lock (_locker)
             {
-                lock (_locker)
+                if (_config.CreateDefaultConfig(new IConfigData[] { configData }))
                 {
-                    if (_config.CreateDefaultConfig(configData))
-                    {
-                        EventStatus?.Invoke(string.Format(Constant.ConfigNotFoundButCreated, Constant.Config));
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
+                    return false;
                 }
-            }
-            catch (ConfigException e)
-            {
-                EventStatus?.Invoke(string.Format(Constant.ConfigFailCreate, Constant.Config, e));
-                return false;
+                else
+                {
+                    return true;
+                }
             }
         }
 
@@ -185,16 +151,6 @@ namespace Pinger.Manager
             Stop();
             _sourceToken?.Dispose();
             _sourceToken = null;
-
-            var lstDlg = EventStatus?.GetInvocationList();
-
-            if (lstDlg != null)
-            {
-                foreach (var dlg in lstDlg)
-                {
-                    EventStatus -= (Status)dlg;
-                }
-            }
         }
     }
 }

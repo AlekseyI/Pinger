@@ -1,6 +1,6 @@
 ﻿namespace Pinger.Enums
 {
-    public enum LogFormatEnum
+    public enum LogFormat
     {
         TextFile
     }

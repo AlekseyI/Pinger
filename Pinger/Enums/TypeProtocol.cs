@@ -1,6 +1,6 @@
 ﻿namespace Pinger.Enums
 {
-    public enum ProtocolTypeEnum
+    public enum TypeProtocol
     {
         Http,
         Icmp,

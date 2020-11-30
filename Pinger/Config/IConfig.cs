@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Pinger.Config
 {
-    public interface IConfig
+    public interface IConfig<T, U>
     {
-        IConfigInput ConfigInput { get; }
-        IEnumerable<IConfigData> Read();
-        void Write(IEnumerable<IConfigData> configData);
-        bool CreateDefaultConfig(IConfigData configData);
+        T ConfigSource { get; }
+        U Read();
+        void Write(U configData);
+        bool CreateDefaultConfig(U configData);
     }
 }

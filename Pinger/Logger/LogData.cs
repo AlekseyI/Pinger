@@ -1,6 +1,6 @@
 ﻿using Pinger.Response;
 
-namespace Pinger.Log
+namespace Pinger.Logger
 {
     public class LogData : ILogData
     {

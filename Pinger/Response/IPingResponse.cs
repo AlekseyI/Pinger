@@ -6,8 +6,8 @@ namespace Pinger.Response
     public interface IPingResponse : IPingResponseFormat
     {
         DateTime Time { get; }
-        ProtocolTypeEnum Protocol { get; }
+        TypeProtocol Protocol { get; }
         string Host { get; } 
-        PingStatusEnum Status { get; } 
+        PingStatus Status { get; } 
     }
 }

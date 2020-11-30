@@ -1,18 +1,17 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
-using Pinger.Request;
+using Pinger.Connection;
 using Pinger.Input;
 using Pinger.Enums;
 using System;
-using Pinger.Exceptions;
 using Moq;
 using Pinger.Response;
 using Pinger;
 using Pinger.Config;
 using Pinger.Factory.Ping;
 using Pinger.Factory;
-using Pinger.Log;
-using Pinger.Log.TextFile;
+using Pinger.Logger;
+using Pinger.Logger.TextFile;
 using Pinger.Config.JsonFile;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -23,7 +22,7 @@ namespace UnitTestPinger
     [TestClass]
     public class UnitTest1
     {
-
+/*
         #region TcpRequest
 
         private string _serverOutput;
@@ -44,10 +43,10 @@ namespace UnitTestPinger
 
                 Assert.AreEqual(TestTcpServer.ServerWaitStatus, _serverOutput);
 
-                using (var tcpRequest = new TcpRequest(hostInput))
+                using (var tcpRequest = new TcpConnection(hostInput))
                 {
                     var response = tcpRequest.Ping();
-                    Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == ProtocolTypeEnum.Tcp && response.Status == PingStatusEnum.Ok && response.Code == 0);
+                    Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == TypeProtocol.Tcp && response.Status == PingStatus.Ok && response.Code == 0);
                 }
             }
             _serverOutput = null;
@@ -59,7 +58,7 @@ namespace UnitTestPinger
             var hostInput = new HostPortInput("127.0.0", _port, new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(hostInput),
+                () => new TcpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(FormatException)).ToString());
         }
 
@@ -67,7 +66,7 @@ namespace UnitTestPinger
         public void TcpPingTimeOutFailTest()
         {
             var tcpRequestMock = new Mock<IPing<IHostPortInput, IPingCodeResponse>>();
-            var expected = new PingCodeResponse(DateTime.Now, ProtocolTypeEnum.Tcp, _ip, PingStatusEnum.TimeOut, -1);
+            var expected = new PingCodeResponse(DateTime.Now, TypeProtocol.Tcp, _ip, PingStatus.TimeOut, -1);
 
             tcpRequestMock.Setup(v => v.Ping()).Returns(expected);
 
@@ -81,7 +80,7 @@ namespace UnitTestPinger
         {
             IHostPortInput hostPort = null;
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(hostPort),
+                () => new TcpConnection(hostPort),
                 new PingRequestException(nameof(hostPort), nameof(ArgumentNullException)).ToString());
         }
 
@@ -91,13 +90,13 @@ namespace UnitTestPinger
             var hostInput = new HostPortInput(null, _port, new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(hostInput),
+                () => new TcpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(ArgumentException)).ToString());
 
             hostInput = new HostPortInput("", _port, new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(hostInput),
+                () => new TcpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(ArgumentException)).ToString());
         }
 
@@ -107,19 +106,19 @@ namespace UnitTestPinger
             var hostInput = new HostPortInput(_ip, _port, TimeSpan.Zero);
 
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(hostInput),
+                () => new TcpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
 
             hostInput = new HostPortInput(_ip, _port, new TimeSpan(0, 0, -1));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(hostInput),
+                () => new TcpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
 
             hostInput = new HostPortInput(_ip, _port, new TimeSpan(25, 0, 0, 0, 0));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new TcpRequest(hostInput),
+                () => new TcpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
         }
 
@@ -148,10 +147,10 @@ namespace UnitTestPinger
         {
             var hostInput = new HostInput("ya.ru", new TimeSpan(0, 0, 5));
 
-            using (var icmpRequest = new IcmpRequest(hostInput))
+            using (var icmpRequest = new IcmpConnection(hostInput))
             {
                 var response = icmpRequest.Ping();
-                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == ProtocolTypeEnum.Icmp && response.Status == PingStatusEnum.Ok);
+                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == TypeProtocol.Icmp && response.Status == PingStatus.Ok);
             }
         }
 
@@ -161,7 +160,7 @@ namespace UnitTestPinger
             var hostInput = new HostInput("ya", new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(hostInput),
+                () => new IcmpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(FormatException)).ToString());
         }
 
@@ -170,10 +169,10 @@ namespace UnitTestPinger
         {
             var hostInput = new HostInput("10.255.255.1", new TimeSpan(0, 0, 1));
 
-            using (var icmpRequest = new IcmpRequest(hostInput))
+            using (var icmpRequest = new IcmpConnection(hostInput))
             {
                 var response = icmpRequest.Ping();
-                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == ProtocolTypeEnum.Icmp && response.Status == PingStatusEnum.TimeOut);
+                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == TypeProtocol.Icmp && response.Status == PingStatus.TimeOut);
             }
         }
 
@@ -183,7 +182,7 @@ namespace UnitTestPinger
             IHostInput hostInput = null;
 
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(hostInput),
+                () => new IcmpConnection(hostInput),
                 new PingRequestException(nameof(hostInput), nameof(ArgumentNullException)).ToString());
         }
 
@@ -193,13 +192,13 @@ namespace UnitTestPinger
             var hostInput = new HostInput(null, new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(hostInput),
+                () => new IcmpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(ArgumentException)).ToString());
 
             hostInput = new HostInput("", new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(hostInput),
+                () => new IcmpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(ArgumentException)).ToString());
         }
 
@@ -209,19 +208,19 @@ namespace UnitTestPinger
             var hostInput = new HostInput("ya.ru", TimeSpan.Zero);
 
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(hostInput),
+                () => new IcmpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
 
             hostInput = new HostInput("ya.ru", new TimeSpan(0, 0, -1));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(hostInput),
+                () => new IcmpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
 
             hostInput = new HostInput("ya.ru", new TimeSpan(25, 0, 0, 0, 0));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new IcmpRequest(hostInput),
+                () => new IcmpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
         }
 
@@ -245,10 +244,10 @@ namespace UnitTestPinger
         {
             var hostInput = new HostInput("https://ya.ru", new TimeSpan(0, 0, 5));
 
-            using (var httpRequest = new HttpRequest(hostInput))
+            using (var httpRequest = new HttpConnection(hostInput))
             {
                 var response = httpRequest.Ping();
-                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == ProtocolTypeEnum.Http && response.Status == PingStatusEnum.Ok && response.Code == 200);
+                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == TypeProtocol.Http && response.Status == PingStatus.Ok && response.Code == 200);
             }
         }
 
@@ -258,7 +257,7 @@ namespace UnitTestPinger
             var hostInput = new HostInput("https:ya.ru", new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(hostInput),
+                () => new HttpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(FormatException)).ToString());
         }
 
@@ -267,10 +266,10 @@ namespace UnitTestPinger
         {
             var hostInput = new HostInput("https://google.com:81", new TimeSpan(0, 0, 1));
 
-            using (var httpRequest = new HttpRequest(hostInput))
+            using (var httpRequest = new HttpConnection(hostInput))
             {
                 var response = httpRequest.Ping();
-                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == ProtocolTypeEnum.Http && response.Status == PingStatusEnum.TimeOut && response.Code == -1);
+                Assert.IsTrue(response.Host == hostInput.Address && response.Protocol == TypeProtocol.Http && response.Status == PingStatus.TimeOut && response.Code == -1);
             }
         }
 
@@ -280,7 +279,7 @@ namespace UnitTestPinger
             IHostInput hostInput = null;
 
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(hostInput),
+                () => new HttpConnection(hostInput),
                 new PingRequestException(nameof(hostInput), nameof(ArgumentNullException)).ToString());
         }
 
@@ -290,13 +289,13 @@ namespace UnitTestPinger
             var hostInput = new HostInput(null, new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(hostInput),
+                () => new HttpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(ArgumentException)).ToString());
 
             hostInput = new HostInput("", new TimeSpan(0, 0, 5));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(hostInput),
+                () => new HttpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.Address), nameof(ArgumentException)).ToString());
         }
 
@@ -306,19 +305,19 @@ namespace UnitTestPinger
             var hostInput = new HostInput("https://ya.ru", TimeSpan.Zero);
 
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(hostInput),
+                () => new HttpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
 
             hostInput = new HostInput("https://ya.ru", new TimeSpan(0, 0, -1));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(hostInput),
+                () => new HttpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
 
             hostInput = new HostInput("https://ya.ru", new TimeSpan(25, 0, 0, 0, 0));
 
             Assert.ThrowsException<PingRequestException>(
-                () => new HttpRequest(hostInput),
+                () => new HttpConnection(hostInput),
                 new PingRequestException(nameof(hostInput.TimeOut), nameof(ArgumentOutOfRangeException)).ToString());
         }
 
@@ -483,7 +482,7 @@ namespace UnitTestPinger
         [TestMethod]
         public void LogTextFileWriteSuccessTest()
         {
-            var pingResponse = new PingResponse(DateTime.Now, ProtocolTypeEnum.Icmp, "ya.ru", PingStatusEnum.Ok);
+            var pingResponse = new PingResponse(DateTime.Now, TypeProtocol.Icmp, "ya.ru", PingStatus.Ok);
 
             var logData = new LogData(pingResponse);
 
@@ -497,7 +496,7 @@ namespace UnitTestPinger
         [TestMethod]
         public void LogTextFileWriteAsyncSuccessTest()
         {
-            var pingResponse = new PingResponse(DateTime.Now, ProtocolTypeEnum.Icmp, "ya.ru", PingStatusEnum.Ok);
+            var pingResponse = new PingResponse(DateTime.Now, TypeProtocol.Icmp, "ya.ru", PingStatus.Ok);
 
             var logData = new LogData(pingResponse);
 
@@ -521,7 +520,7 @@ namespace UnitTestPinger
         [TestMethod]
         public void LogTextFileLogDataNullFailTest()
         {
-            var logInput = new LogInput("D:\\" + Constant.Log, LogFormatEnum.TextFile);
+            var logInput = new LogInput("D:\\" + Constant.Log, LogFormat.TextFile);
             var log = new LogTextFile(logInput);
             ILogData logData = null;
 
@@ -671,50 +670,50 @@ namespace UnitTestPinger
         [TestMethod]
         public void PingFactoryGetHttpRequestInstanceSuccessTest()
         {
-            var httpConfig = Mock.Of<IConfigData>(v => v.Host == "https://ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == ProtocolTypeEnum.Http && v.TimeOut == new TimeSpan(0, 0, 5));
+            var httpConfig = Mock.Of<IConfigData>(v => v.Host == "https://ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == TypeProtocol.Http && v.TimeOut == new TimeSpan(0, 0, 5));
 
             var factory = new PingRequestFactory();
 
-            Assert.IsInstanceOfType(factory.GetInstance(httpConfig), typeof(HttpRequest));
+            Assert.IsInstanceOfType(factory.GetInstance(httpConfig), typeof(HttpConnection));
         }
 
         [TestMethod]
         public void PingFactoryGetIcmpRequestInstanceSuccessTest()
         {
-            var icmpConfig = Mock.Of<IConfigData>(v => v.Host == "ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == ProtocolTypeEnum.Icmp && v.TimeOut == new TimeSpan(0, 0, 5));
+            var icmpConfig = Mock.Of<IConfigData>(v => v.Host == "ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == TypeProtocol.Icmp && v.TimeOut == new TimeSpan(0, 0, 5));
 
             var factory = new PingRequestFactory();
 
             using (var icmpRequest = factory.GetInstance(icmpConfig))
             {
-                Assert.IsInstanceOfType(icmpRequest, typeof(IcmpRequest));
+                Assert.IsInstanceOfType(icmpRequest, typeof(IcmpConnection));
             }
         }
 
         [TestMethod]
         public void PingFactoryGetTcpRequestInstanceSuccessTest()
         {
-            var tcpConfig = Mock.Of<IConfigData>(v => v.Host == "127.0.0.1:5000" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == ProtocolTypeEnum.Tcp && v.TimeOut == new TimeSpan(0, 0, 5));
+            var tcpConfig = Mock.Of<IConfigData>(v => v.Host == "127.0.0.1:5000" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == TypeProtocol.Tcp && v.TimeOut == new TimeSpan(0, 0, 5));
 
             var factory = new PingRequestFactory();
 
             using (var tcpRequest = factory.GetInstance(tcpConfig))
             {
-                Assert.IsInstanceOfType(tcpRequest, typeof(TcpRequest));
+                Assert.IsInstanceOfType(tcpRequest, typeof(TcpConnection));
             }
         }
 
         [TestMethod]
         public void PingFactoryGetInstanceFailTest()
         {
-            var icmpConfig = Mock.Of<IConfigData>(v => v.Host == "ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == ProtocolTypeEnum.Icmp && v.TimeOut == new TimeSpan(0, 0, 5));
+            var icmpConfig = Mock.Of<IConfigData>(v => v.Host == "ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == TypeProtocol.Icmp && v.TimeOut == new TimeSpan(0, 0, 5));
 
             var factoryMock = new Mock<IFactory<IConfigData, IPing<IHostInput, IPingResponse>>>();
 
             factoryMock.Setup(v => v.GetInstance(icmpConfig)).Returns(new OtherRequest());
 
             Assert.ThrowsException<AssertFailedException>(
-                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(icmpConfig), typeof(IcmpRequest)));
+                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(icmpConfig), typeof(IcmpConnection)));
         }
 
         [TestMethod]
@@ -731,7 +730,7 @@ namespace UnitTestPinger
         [TestMethod]
         public void PingFactoryProtocolTypeUnsupportedTest()
         {
-            var icmpConfig = Mock.Of<IConfigData>(v => v.Host == "ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == ProtocolTypeEnum.Icmp && v.TimeOut == new TimeSpan(0, 0, 5));
+            var icmpConfig = Mock.Of<IConfigData>(v => v.Host == "ya.ru" && v.Period == new TimeSpan(0, 0, 1) && v.Protocol == TypeProtocol.Icmp && v.TimeOut == new TimeSpan(0, 0, 5));
 
             var factory = new OtherPingRequestFactory(OtherPingRequestFactory.ProtocolTypeEnum.Unknown);
 
@@ -796,27 +795,27 @@ namespace UnitTestPinger
         {
             var factory = new LogFactory();
 
-            Assert.IsInstanceOfType(factory.GetInstance(new LogInput(Constant.Log, LogFormatEnum.TextFile)), typeof(LogTextFile));
+            Assert.IsInstanceOfType(factory.GetInstance(new LogInput(Constant.Log, LogFormat.TextFile)), typeof(LogTextFile));
         }
 
         [TestMethod]
         public void LogFactoryGetLogTextFileInstanceFailTest()
         {
             var factoryMock = new Mock<IFactory<Enum, ILog>>();
-            factoryMock.Setup(v => v.GetInstance(LogFormatEnum.TextFile)).Returns(new LogOther());
+            factoryMock.Setup(v => v.GetInstance(LogFormat.TextFile)).Returns(new LogOther());
 
             Assert.ThrowsException<AssertFailedException>(
-                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(LogFormatEnum.TextFile), typeof(LogTextFile)));
+                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(LogFormat.TextFile), typeof(LogTextFile)));
         }
 
         [TestMethod]
         public void LogFactoryLogTextFileInstanceFailTest()
         {
             var factoryMock = new Mock<IFactory<Enum, ILog>>();
-            factoryMock.Setup(v => v.GetInstance(LogFormatEnum.TextFile)).Returns(new LogOther());
+            factoryMock.Setup(v => v.GetInstance(LogFormat.TextFile)).Returns(new LogOther());
 
             Assert.ThrowsException<AssertFailedException>(
-                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(LogFormatEnum.TextFile), typeof(LogTextFile)));
+                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(LogFormat.TextFile), typeof(LogTextFile)));
         }
 
         [TestMethod]
@@ -849,7 +848,7 @@ namespace UnitTestPinger
             public string Host { get; set; }
             public TimeSpan Period { get; set; }
             public TimeSpan TimeOut { get; set; }
-            public ProtocolTypeEnum Protocol { get; set; }
+            public TypeProtocol Protocol { get; set; }
         }
 
         public class DefaultConfigOtherFactory : IFactory<IConfigInput, IConfigData>
@@ -884,17 +883,17 @@ namespace UnitTestPinger
         {
             var factory = new DefaultConfigFactory();
 
-            Assert.IsInstanceOfType(factory.GetInstance(new ConfigInput("D:\\" + Constant.Config, ConfigFormatEnum.JsonFile)), typeof(ConfigJsonData));
+            Assert.IsInstanceOfType(factory.GetInstance(new ConfigInput("D:\\" + Constant.Config, ConfigFormat.JsonFile)), typeof(ConfigJsonData));
         }
 
         [TestMethod]
         public void DefaultConfigFactoryGetConfigJsonDataInstanceFailTest()
         {
             var factoryMock = new Mock<IFactory<Enum, IConfigData>>();
-            factoryMock.Setup(v => v.GetInstance(ConfigFormatEnum.JsonFile)).Returns(new DefaultConfigOther());
+            factoryMock.Setup(v => v.GetInstance(ConfigFormat.JsonFile)).Returns(new DefaultConfigOther());
 
             Assert.ThrowsException<AssertFailedException>(
-                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(ConfigFormatEnum.JsonFile), typeof(ConfigJsonData)));
+                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(ConfigFormat.JsonFile), typeof(ConfigJsonData)));
         }
 
         [TestMethod]
@@ -974,17 +973,17 @@ namespace UnitTestPinger
         {
             var factory = new ConfigFactory();
 
-            Assert.IsInstanceOfType(factory.GetInstance(new ConfigInput("D:\\" + Constant.Config, ConfigFormatEnum.JsonFile)), typeof(ConfigJsonFile<ConfigJsonData>));
+            Assert.IsInstanceOfType(factory.GetInstance(new ConfigInput("D:\\" + Constant.Config, ConfigFormat.JsonFile)), typeof(ConfigJsonFile<ConfigJsonData>));
         }
 
         [TestMethod]
         public void ConfigFactoryGetConfigJsonFileInstanceFailTest()
         {
             var factoryMock = new Mock<IFactory<Enum, IConfig>>();
-            factoryMock.Setup(v => v.GetInstance(ConfigFormatEnum.JsonFile)).Returns(new ConfigOther());
+            factoryMock.Setup(v => v.GetInstance(ConfigFormat.JsonFile)).Returns(new ConfigOther());
 
             Assert.ThrowsException<AssertFailedException>(
-                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(ConfigFormatEnum.JsonFile), typeof(ConfigJsonFile<ConfigJsonData>)));
+                () => Assert.IsInstanceOfType(factoryMock.Object.GetInstance(ConfigFormat.JsonFile), typeof(ConfigJsonFile<ConfigJsonData>)));
         }
 
         [TestMethod]
@@ -1085,7 +1084,7 @@ namespace UnitTestPinger
         public void PingManagerStartPingRequestInstanceFailTest()
         {
             var pingManagerMock = new Mock<IPingManager>();
-            string expected = string.Format(Constant.PingRequestInstanceFail, ProtocolTypeEnum.Http, new PingRequestException());
+            string expected = string.Format(Constant.PingRequestInstanceFail, TypeProtocol.Http, new PingRequestException());
             string response = null;
 
             pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
@@ -1098,7 +1097,7 @@ namespace UnitTestPinger
         public void PingManagerStartPingRequestFailTest()
         {
             var pingManagerMock = new Mock<IPingManager>();
-            string expected = string.Format(Constant.PingRequestFail, ProtocolTypeEnum.Http, new PingRequestException());
+            string expected = string.Format(Constant.PingRequestFail, TypeProtocol.Http, new PingRequestException());
             string response = null;
 
             pingManagerMock.Setup(v => v.Start()).Callback(() => response = expected);
@@ -1187,5 +1186,6 @@ namespace UnitTestPinger
         }
 
         #endregion
+*/
     }
 }

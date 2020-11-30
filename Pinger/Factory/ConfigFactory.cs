@@ -1,26 +1,26 @@
 ﻿using Pinger.Config;
 using Pinger.Config.JsonFile;
 using Pinger.Enums;
-using Pinger.Exceptions;
 using System;
+using System.Collections.Generic;
 
 namespace Pinger.Factory
 {
-    public class ConfigFactory : IFactory<IConfigInput, IConfig>
+    public class ConfigFactory : IFactory<IConfigSource, IConfig<IConfigSource, IEnumerable<IConfigData>>>
     {
-        public IConfig GetInstance(IConfigInput configInput)
+        public IConfig<IConfigSource, IEnumerable<IConfigData>> GetInstance(IConfigSource configSource)
         {
-            if (configInput == null)
+            if (configSource == null)
             {
-                throw new ConfigException(nameof(configInput), nameof(ArgumentNullException));
+                throw new ArgumentNullException(nameof(configSource));
             }
 
-            switch(configInput.Format)
+            switch(configSource.Format)
             {
-                case ConfigFormatEnum.JsonFile:
-                    return new ConfigJsonFile<ConfigJsonData>(configInput);
+                case ConfigFormat.JsonFile:
+                    return new ConfigJsonFile<IEnumerable<ConfigJsonData>>(configSource);
                 default:
-                    throw new ConfigException($"{nameof(configInput.Format)} = {configInput.Format} is unsupported", nameof(ArgumentException));
+                    throw new ArgumentException($"{nameof(configSource.Format)} = {configSource.Format} is unsupported");
             }
         }
     }

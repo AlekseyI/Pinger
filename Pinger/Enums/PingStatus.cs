@@ -1,6 +1,6 @@
 ﻿namespace Pinger.Enums
 {
-    public enum PingStatusEnum
+    public enum PingStatus
     {
         Ok,
         Fail,

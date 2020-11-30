@@ -1,26 +1,25 @@
 ﻿using Pinger.Enums;
-using Pinger.Exceptions;
-using Pinger.Log;
-using Pinger.Log.TextFile;
+using Pinger.Logger;
+using Pinger.Logger.TextFile;
 using System;
 
 namespace Pinger.Factory
 {
-    public class LogFactory : IFactory<ILogInput, ILog>
+    public class LogFactory : IFactory<ILogSource, ILogger<ILogSource, ILogData>>
     {
-        public ILog GetInstance(ILogInput logInput)
+        public ILogger<ILogSource, ILogData> GetInstance(ILogSource loggerSource)
         {
-            if (logInput == null)
+            if (loggerSource == null)
             {
-                throw new LogException(nameof(logInput), nameof(ArgumentNullException));
+                throw new ArgumentNullException(nameof(loggerSource));
             }
 
-            switch (logInput.Format)
+            switch (loggerSource.Format)
             {
-                case LogFormatEnum.TextFile:
-                    return new LogTextFile(logInput);
+                case LogFormat.TextFile:
+                    return new LoggerTextFile(loggerSource);
                 default:
-                    throw new LogException($"{nameof(logInput.Format)} = {logInput.Format} is unsupported", nameof(ArgumentException));
+                    throw new ArgumentException($"{nameof(loggerSource.Format)} = {loggerSource.Format} is unsupported");
             }
         }
     }

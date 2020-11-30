@@ -1,6 +1,6 @@
 ﻿namespace Pinger.Enums
 {
-    public enum ConfigFormatEnum
+    public enum ConfigFormat
     {
         JsonFile
     }
