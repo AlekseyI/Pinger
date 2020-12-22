@@ -7,14 +7,17 @@ using System.Threading.Tasks;
 
 namespace Pinger.Connection
 {
-    public class TcpConnection : IPing<IHostPortInput, IPingCodeResponse>
+    public class TcpConnection : IPing<IHostInput, IPingCodeResponse>
     {
         private Socket _socket;
 
-        public IHostPortInput HostInput { get; }
+        public IHostInput HostInput { get; }
         public IPingCodeResponse Response { get; private set; }
 
-        public TcpConnection(IHostPortInput hostInput)
+        private string _ip;
+        private int _port;
+
+        public TcpConnection(IHostInput hostInput)
         {
             if (hostInput == null)
             {
@@ -28,17 +31,14 @@ namespace Pinger.Connection
             {
                 throw new ArgumentOutOfRangeException(nameof(hostInput.TimeOut));
             }
-            else if (hostInput.Port <= 0 || hostInput.Port > int.MaxValue)
-            {
-                throw new ArgumentOutOfRangeException(nameof(hostInput.Port));
-            }
             else
             {
-                IHostInputCheck inputCheck = new HostInputValidate();
+                var inputParser = new HostInputValidate();
+                (_ip, _port) = inputParser.Parse(hostInput.Address);
 
-                if (!inputCheck.Check(hostInput.Address, Constant.TcpIpCheckPattern))
+                if (_port <= 0)
                 {
-                    throw new FormatException(nameof(hostInput.Address));
+                    throw new ArgumentOutOfRangeException(nameof(_port));
                 }
 
                 HostInput = hostInput;
@@ -53,7 +53,7 @@ namespace Pinger.Connection
 
             try
             {
-                var request = _socket.ConnectAsync(HostInput.Address, HostInput.Port);
+                var request = _socket.ConnectAsync(_ip, _port);
                 await await Task.WhenAny(request, Task.Delay(HostInput.TimeOut));
 
                 if (!request.IsCompleted)

@@ -4,7 +4,7 @@ namespace Pinger.Logger
 {
     public interface ILogger<T, U>
     {
-        T LoggerSource { get; }
-        Task WriteAsync(U loggerData);
+        T LogSource { get; }
+        Task WriteAsync(U logData);
     }
 }

@@ -6,28 +6,23 @@ namespace Pinger.Logger.TextFile
 {
     public class LoggerTextFile : ILogger<ILogSource, ILogData>
     {
-        public ILogSource LoggerSource { get; }
+        public ILogSource LogSource { get; }
 
-        public LoggerTextFile(ILogSource loggerSource)
+        public LoggerTextFile(ILogSource logSource)
         {
-            if (loggerSource == null)
+            if (logSource == null)
             {
-                throw new ArgumentNullException(nameof(loggerSource));
+                throw new ArgumentNullException(nameof(logSource));
             }
 
-            LoggerSource = loggerSource;
+            LogSource = logSource;
         }
 
-        public async Task WriteAsync(ILogData loggerData)
+        public async Task WriteAsync(ILogData logData)
         {
-            if (loggerData == null)
+            using (var stream = new StreamWriter(LogSource.Path, true))
             {
-                throw new ArgumentNullException(nameof(loggerData));
-            }
-
-            using (var stream = new StreamWriter(LoggerSource.Path, true))
-            {
-                await stream.WriteLineAsync(loggerData.Log.FormatToString());
+                await stream.WriteLineAsync(logData.Log.ToString());
             }
         }
     }

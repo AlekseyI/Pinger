@@ -3,7 +3,7 @@ using System;
 
 namespace Pinger.Response
 {
-    public interface IPingResponse : IPingResponseFormat
+    public interface IPingResponse
     {
         DateTime Time { get; }
         TypeProtocol Protocol { get; }

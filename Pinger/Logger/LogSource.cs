@@ -7,8 +7,6 @@ namespace Pinger.Logger
         public LogFormat Format { get; }
         public string Path { get; }
 
-        public LogSource() { }
-
         public LogSource(string path, LogFormat format)
         {
             Path = path;

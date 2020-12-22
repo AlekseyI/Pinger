@@ -20,9 +20,7 @@ namespace Pinger.Response
             Code = code;
         }
 
-        public PingCodeResponse() { }
-
-        public string FormatToString()
+        public override string ToString()
         {
             return $"{ Time } { Protocol } { Host } { Status } { Code }";
         }

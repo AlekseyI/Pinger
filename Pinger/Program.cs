@@ -18,9 +18,12 @@ namespace Pinger
             var config = new ConfigFactory().GetInstance(configSource);
             var log = new LogFactory().GetInstance(logSource);
             var configData = new DefaultConfigFactory().GetInstance(configSource);
-            
-            using (var pinger = new PingManager(pingRequestFactory, config, log))
+
+            PingManager pinger = null;
+            try
             {
+                pinger = new PingManager(pingRequestFactory, config, log);
+
                 if (pinger.CheckConfig(configData))
                 {
                     pinger.Start(false);
@@ -30,7 +33,13 @@ namespace Pinger
                 {
                     Console.WriteLine(Constant.Config + " не найден, поэтому он был создан");
                 }
+
             }
+            finally
+            {
+                pinger?.Stop();
+            }
+
             Console.ReadKey();
         }
     }

@@ -60,7 +60,6 @@
     <Compile Include="Factory\PingRequestFactory.cs" />
     <Compile Include="Input\HostInput.cs" />
     <Compile Include="Input\HostInputValidate.cs" />
-    <Compile Include="Input\HostPortInput.cs" />
     <Compile Include="Input\IHostInputCheck.cs" />
     <Compile Include="Input\IHostInputParse.cs" />
     <Compile Include="Logger\ILogger.cs" />
@@ -76,12 +75,10 @@
     <Compile Include="Connection\IcmpConnection.cs" />
     <Compile Include="Config\IConfigData.cs" />
     <Compile Include="Config\IConfigSource.cs" />
-    <Compile Include="Input\IHostPortInput.cs" />
     <Compile Include="Input\IHostInput.cs" />
     <Compile Include="Response\IPingCodeResponse.cs" />
     <Compile Include="Connection\IPing.cs" />
     <Compile Include="Response\IPingResponse.cs" />
-    <Compile Include="Response\IPingResponseFormat.cs" />
     <Compile Include="Response\PingResponse.cs" />
     <Compile Include="Enums\PingStatus.cs" />
     <Compile Include="Program.cs" />

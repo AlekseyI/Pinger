@@ -3,7 +3,7 @@ using System;
 
 namespace Pinger.Manager
 {
-    public interface IPingManager : IDisposable
+    public interface IPingManager
     {
         void Start(bool isWait);
         void Stop();

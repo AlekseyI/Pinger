@@ -4,7 +4,6 @@ using Pinger.Input;
 using Pinger.Enums;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Net;
 
 namespace Pinger.Connection
 {
@@ -44,26 +43,23 @@ namespace Pinger.Connection
         {
             PingStatus status;
             int code = -1;
-            var httpClient = new HttpClient();
-
             try
             {
-                httpClient.Timeout = HostInput.TimeOut;
-                var result = await httpClient.GetAsync(HostInput.Address);
-                status = result.IsSuccessStatusCode ? PingStatus.Ok : PingStatus.Fail;
-                code = result != null ? (int)result.StatusCode : code;
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.Timeout = HostInput.TimeOut;
+                    var result = await httpClient.GetAsync(HostInput.Address);
+                    status = result.IsSuccessStatusCode ? PingStatus.Ok : PingStatus.Fail;
+                    code = result != null ? (int)result.StatusCode : code;
+                }
             }
             catch (HttpRequestException)
-            {  
+            {
                 status = PingStatus.Fail;
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 status = PingStatus.TimeOut;
-            }
-            finally
-            {
-                httpClient.Dispose();
             }
 
             Response = new PingCodeResponse(DateTime.Now, TypeProtocol.Http, HostInput.Address, status, code);

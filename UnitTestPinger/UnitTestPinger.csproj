@@ -62,8 +62,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigJsonFileTest.cs" />
+    <Compile Include="Connection\HttpConnectionTest.cs" />
+    <Compile Include="Connection\TcpConnectionTest.cs" />
+    <Compile Include="Connection\IcmpConnectionTest.cs" />
+    <Compile Include="Factory\ConfigFactoryTest.cs" />
+    <Compile Include="Factory\DefaultConfigFactoryTest.cs" />
+    <Compile Include="Factory\LogFactorTest.cs" />
+    <Compile Include="HostInputValidateTest.cs" />
+    <Compile Include="LogTexFileTest.cs" />
+    <Compile Include="Factory\PingRequestFactoryTest.cs" />
+    <Compile Include="PingManagerTest.cs" />
     <Compile Include="TestTcpServer.cs" />
-    <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

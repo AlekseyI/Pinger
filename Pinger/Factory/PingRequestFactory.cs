@@ -27,10 +27,8 @@ namespace Pinger.Factory.Ping
                         return new IcmpConnection(new HostInput(configData.Host, configData.TimeOut));
                     }
                 case TypeProtocol.Tcp:
-                    {
-                        IHostInputParse inputParser = new HostInputValidate();
-                        var (ip, port) = inputParser.Parse(configData.Host);
-                        return new TcpConnection(new HostPortInput(ip, port, configData.TimeOut));
+                    {                       
+                        return new TcpConnection(new HostInput(configData.Host, configData.TimeOut));
                     }
                 default:
                     {

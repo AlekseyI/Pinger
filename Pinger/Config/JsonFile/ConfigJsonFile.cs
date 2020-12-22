@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Pinger.Config.JsonFile
 {
@@ -9,33 +10,28 @@ namespace Pinger.Config.JsonFile
     {
         public IConfigSource ConfigSource { get; }
 
-        public ConfigJsonFile(IConfigSource configInput)
+        public ConfigJsonFile(IConfigSource configSource)
         {
-            if (configInput == null)
+            if (configSource == null)
             {
-                throw new ArgumentNullException(nameof(configInput));
+                throw new ArgumentNullException(nameof(configSource));
             }
-            else if (string.IsNullOrEmpty(configInput.Path))
+            else if (string.IsNullOrEmpty(configSource.Path))
             {
-                throw new ArgumentException(nameof(configInput.Path) + " is null or empty");
+                throw new ArgumentException(nameof(configSource.Path) + " is null or empty");
             }
             else
             {
-                ConfigSource = configInput;
+                ConfigSource = configSource;
             }
         }
 
         public IEnumerable<IConfigData> Read()
         {
-            T configData;
-
             using (var stream = new StreamReader(ConfigSource.Path))
             {
-                configData = JsonConvert.DeserializeObject<T>(stream.ReadToEnd());
-                
+                return JsonConvert.DeserializeObject<T>(stream.ReadToEnd());
             }
-
-            return configData;
         }
 
         public void Write(IEnumerable<IConfigData> configData)
@@ -48,15 +44,13 @@ namespace Pinger.Config.JsonFile
 
         public bool CreateDefaultConfig(IEnumerable<IConfigData> configData)
         {
-            if (!File.Exists(ConfigSource.Path))
-            {
-                Write(configData);
-                return true;
-            }
-            else
+            if (File.Exists(ConfigSource.Path))
             {
                 return false;
             }
+
+            Write(configData);
+            return true;
         }
     }
 }

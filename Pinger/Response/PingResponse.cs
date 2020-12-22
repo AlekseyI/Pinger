@@ -18,9 +18,7 @@ namespace Pinger.Response
             Status = status;
         }
 
-        public PingResponse() { }
-
-        public string FormatToString()
+        public override string ToString()
         {
             return $"{ Time } { Protocol } { Host } { Status }";
         }
